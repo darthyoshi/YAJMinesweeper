@@ -1,0 +1,5 @@
+/.gitignore
+/nbproject/private/
+/preferences.txt
+/build/
+*.json
