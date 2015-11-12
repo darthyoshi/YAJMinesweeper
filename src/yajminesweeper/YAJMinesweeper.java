@@ -565,8 +565,6 @@ public class YAJMinesweeper extends PApplet {
       }
 
       if(!gameOver && !gameWin) {
-
-
         if(
           x >= 0 &&
           x < gridWidth[currentDifficulty] &&
@@ -617,49 +615,56 @@ public class YAJMinesweeper extends PApplet {
         flags.removeValue(index);
       }
 
-      int mineCount = numMines[currentDifficulty] - flags.size();
-      PImage[] mineCounter = new PImage[3];
-      if(mineCount < 0) {
-        mineCounter[0] = counterDash;
+      updateMineCounter(numMines[currentDifficulty] - flags.size());
+    }
+  }
 
-        if(mineCount <= -99) {
-          mineCounter[1] = mineCounter[2] = counterNums[9];
-        }
-        else {
-          mineCounter[1] = counterNums[(Math.abs(mineCount)%100)/10];
-          mineCounter[2] = counterNums[Math.abs(mineCount)%10];
-        }
+  /**
+   * Updates the mine counter display.
+   * @param mineCount the number of mines remaining
+   */
+  private void updateMineCounter(int mineCount) {
+    PImage[] mineCounter = new PImage[3];
+    if(mineCount < 0) {
+      mineCounter[0] = counterDash;
+
+      if(mineCount <= -99) {
+        mineCounter[1] = mineCounter[2] = counterNums[9];
       }
       else {
-        mineCounter[0] = counterNums[mineCount/100];
-        mineCounter[1] = counterNums[(mineCount%100)/10];
-        mineCounter[2] = counterNums[mineCount%10];
+        mineCounter[1] = counterNums[(Math.abs(mineCount)%100)/10];
+        mineCounter[2] = counterNums[Math.abs(mineCount)%10];
       }
-      counterMines = createGraphics(counter.width, counter.height);
-      counterMines.beginDraw();
-      counterMines.copy(
-        mineCounter[0],
-        0, 0,
-        counterNums[0].width, counterNums[0].height,
-        2, 2,
-        counterNums[0].width, counterNums[0].height
-      );
-      counterMines.copy(
-        mineCounter[1],
-        0, 0,
-        counterNums[0].width, counterNums[0].height,
-        counterNums[0].width+4, 2,
-        counterNums[0].width, counterNums[0].height
-      );
-      counterMines.copy(
-        mineCounter[2],
-        0, 0,
-        counterNums[0].width, counterNums[0].height,
-        2*counterNums[0].width+6, 2,
-        counterNums[0].width, counterNums[0].height
-      );
-      counterMines.endDraw();
     }
+    else {
+      mineCounter[0] = counterNums[mineCount/100];
+      mineCounter[1] = counterNums[(mineCount%100)/10];
+      mineCounter[2] = counterNums[mineCount%10];
+    }
+    counterMines = createGraphics(counter.width, counter.height);
+    counterMines.beginDraw();
+    counterMines.copy(
+      mineCounter[0],
+      0, 0,
+      counterNums[0].width, counterNums[0].height,
+      2, 2,
+      counterNums[0].width, counterNums[0].height
+    );
+    counterMines.copy(
+      mineCounter[1],
+      0, 0,
+      counterNums[0].width, counterNums[0].height,
+      counterNums[0].width+4, 2,
+      counterNums[0].width, counterNums[0].height
+    );
+    counterMines.copy(
+      mineCounter[2],
+      0, 0,
+      counterNums[0].width, counterNums[0].height,
+      2*counterNums[0].width+6, 2,
+      counterNums[0].width, counterNums[0].height
+    );
+    counterMines.endDraw();
   }
 
   @Override
@@ -790,7 +795,8 @@ public class YAJMinesweeper extends PApplet {
           }
 
           if(mouseButton == LEFT) {
-            if(canvas.tiles[x][y].value == -1) {
+            if(canvas.tiles[x][y].flagType != 1 &&
+                canvas.tiles[x][y].value == -1) {
               gameOver(canvas.tiles[x][y]);
             }
 
@@ -854,6 +860,7 @@ public class YAJMinesweeper extends PApplet {
 
               canvas.tiles[tmpX][tmpY].activateFlag();
             }
+            updateMineCounter(0);
 
             short time = (short)((System.currentTimeMillis() - startTime)/1000);
             if(time < scores[currentDifficulty]) {
@@ -1193,7 +1200,7 @@ public class YAJMinesweeper extends PApplet {
      * Cycles through the tile flag states.
      */
     void cycleFlag() {
-      flagType = (short)((++flagType)%3);
+      flagType = (short)((flagType+1)%3);
 
       switch(flagType) {
         case 0:
